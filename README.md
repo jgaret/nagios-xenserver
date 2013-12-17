@@ -27,17 +27,14 @@ Todo:
 
 nagios command definition: 
 --------------------------
+	 define command{
+	        command_name    check_xenserver_sr
+        	command_line    $USER1$/check_xenserver.py $ARG1$ "$USER15$" "$USER16$" "$ARG2$" $ARG3$ check_sr
+ 	 }
 
-'''
- define command{
-        command_name    check_xenserver_sr
-        command_line    $USER1$/check_xenserver.py $ARG1$ "$USER15$" "$USER16$" "$ARG2$" $ARG3$ check_sr
- }
-
- define command{
-        command_name    check_xenserver_mem
-        command_line    $USER1$/check_xenserver.py $ARG1$ "$USER15$" "$USER16$" "$ARG2$" $ARG3$ check_mem
- }
-'''
+ 	define command{
+        	command_name    check_xenserver_mem
+        	command_line    $USER1$/check_xenserver.py $ARG1$ "$USER15$" "$USER16$" "$ARG2$" $ARG3$ check_mem
+ 	}
 
 USER16 and USER15 are username and password in resource.cfg
