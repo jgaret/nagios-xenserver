@@ -357,16 +357,35 @@ def check_cpu(session, warning, critical):
 		
 		
 if __name__ == "__main__":
-	if len(sys.argv) <> 7:
+	if len(sys.argv) < 6 or len(sys.argv) > 7:
 		print "Usage:"
 		print sys.argv[0], " <XenServer poolmaster ip or fqdn> <username> <password> <warning %> <critical %> check_{sr,mem,hosts,cpu}"
-		sys.exit(1)
+		print sys.argv[0], " or "
+		print sys.argv[0], " <XenServer poolmaster ip or fqdn> <config> <warning %> <critical %> check_{sr,mem,hosts,cpu}"
+		sys.exit(3)
+
 	url = sys.argv[1]
-	username = sys.argv[2]
-	password = sys.argv[3]
-	warning  = sys.argv[4]
-	critical = sys.argv[5]
-	call = sys.argv[6]
+		
+	# If 7 args : username + password given
+	if len (sys.argv) == 7:
+		username = sys.argv[2]
+		password = sys.argv[3]
+		warning  = sys.argv[4]
+		critical = sys.argv[5]
+		call = sys.argv[6]
+		
+	# If 6 args : config file given
+	if len (sys.argv) == 6:
+		import ConfigParser, os
+		config = ConfigParser.ConfigParser()
+		config.readfp(open(sys.argv[2]))
+		
+		username = config.get(url,"username")
+		password = config.get(url,"password")
+		warning  = sys.argv[3]
+		critical = sys.argv[4]
+		call = sys.argv[5]
+	
 
 	options  = {
 		'check_sr': check_sr,
