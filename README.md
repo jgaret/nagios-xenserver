@@ -5,18 +5,31 @@ Nagios check plugin for xenserver
 ---------------------------------
 
 	Usage: ./check_xenserver.py <XenServer IP or FQDN> <username> <password> <warning level %> <critical level %> <check_{sr,mem,cpu,hosts}>
+or, if using config file to store username or password
+	Usage: ./check_xenserver.py <XenServer IP or FQDN> <config file> <warning level %> <critical level %> <check_{sr,mem,cpu,hosts}>
 
+Config file follows ini format. A section is the XenServer IP or FQDN you are calling, values are username and password.
+Example :
+```
+[127.0.0.1]
+username: root
+password: root	
+[10.0.0.1]
+username: nagios
+password: nagios
+```	
  - Uses https to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
  - Uses (python) XenAPI, download it from XenServer http://www.xenserver.org/partners/developing-products-for-xenserver.html and parse_rrd
 
 Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code
 
-Dated: 12/16/2013
-Version: 1.0
+Dated: 09/02/2014
+Version: 1.1
 
 Version history:
 ----------------
  - v1.0: Initial release
+ - v1.1: Config file support + return code for check_hosts
  
 
 Todo:

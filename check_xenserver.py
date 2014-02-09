@@ -14,10 +14,11 @@
 # Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code
 #
 # Dated: 12/16/2013
-# Version: 1.0
+# Version: 1.1
 #
 # Version history:
 # - v1.0: Initial release
+# - v1.1: Config file support + return code for check_hosts
 # 
 # nagios command definition: 
 #
@@ -187,6 +188,7 @@ def check_sr(session, warning, critical):
 		performance = performancedata("Total", "_used_space",
 					humanize_bytes(total_disk, precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes(total_alloc, precision=1, suffix=False, format=performancedata_format),
+					humanize_bytes(total_alloc, precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes((total_disk/100)*float(warning), precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes((total_disk/100)*float(critical), precision=1, suffix=False, format=performancedata_format),
 					performancedata_format)
@@ -354,6 +356,7 @@ def check_cpu(session, warning, critical):
 	";\n".join([host+" Used CPU = "+str(round(perfdata[host],2)) for host in perfdata]) + "; |" +\
 	" ".join(["'"+host+"_used_cpu'="+str(round(perfdata[host],2))+"%"+str(float(warning)/100)+";" + str(float(critical)/100)+";0;100" for host in perfdata])
 	
+	sys.exit(exitcode)
 		
 		
 if __name__ == "__main__":
