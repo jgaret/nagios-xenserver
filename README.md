@@ -23,13 +23,15 @@ password: nagios
 
 Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code
 
-Dated: 09/02/2014
-Version: 1.1
+Dated: 10/02/2014
+Version: 1.2
 
 Version history:
 ----------------
  - v1.0: Initial release
  - v1.1: Config file support + return code for check_hosts
+ - v1.2: Bug fixes : return status for SRs and Mem, perfdata format
+		 Features : service output for SRs and Mem, 
  
 
 Todo:

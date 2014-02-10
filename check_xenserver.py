@@ -13,12 +13,14 @@
 #
 # Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code
 #
-# Dated: 12/16/2013
-# Version: 1.1
+# Dated: 10/02/2013
+# Version: 1.2
 #
 # Version history:
 # - v1.0: Initial release
 # - v1.1: Config file support + return code for check_hosts
+# - v1.2: Bug fixes : return status for SRs and Mem, perfdata format
+#		  Features : service output for SRs and Mem, 
 # 
 # nagios command definition: 
 #
@@ -168,17 +170,25 @@ def check_sr(session, warning, critical):
 	output = {}
 	total_disk = 0
 	total_alloc = 0
+	critical_srs = []
+	warning_srs = []
 
 	srs = session.xenapi.SR.get_all()
 	for cur_sr in srs:
+		sr_name = session.xenapi.SR.get_name_label(cur_sr)
 		if session.xenapi.SR.get_shared(cur_sr) and session.xenapi.SR.get_type(cur_sr) != 'iso':
-			exitcode, status, servicedata, perfdata, total, alloc = sr(session, session.xenapi.SR.get_name_label(cur_sr), warning, critical, performancedata_format)
+			exitcode, status, servicedata, perfdata, total, alloc = sr(session, sr_name, warning, critical, performancedata_format)
 			if exitcode > finalexit:
 				finalexit = exitcode
+				
+			if exitcode == 2:
+				critical_srs.append(sr_name)
+			if exitcode == 1:
+				warning_srs.append(sr_name)
 
-			output[session.xenapi.SR.get_name_label(cur_sr)] = {}
-			output[session.xenapi.SR.get_name_label(cur_sr)]['service'] = servicedata
-			output[session.xenapi.SR.get_name_label(cur_sr)]['perf'] = perfdata
+			output[sr_name] = {}
+			output[sr_name]['service'] = servicedata
+			output[sr_name]['perf'] = perfdata
 			
 			total_disk += total
 			total_alloc += alloc
@@ -187,7 +197,6 @@ def check_sr(session, warning, critical):
 	if performancedata_format == "pnp4nagios":
 		performance = performancedata("Total", "_used_space",
 					humanize_bytes(total_disk, precision=1, suffix=False, format=performancedata_format),
-					humanize_bytes(total_alloc, precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes(total_alloc, precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes((total_disk/100)*float(warning), precision=1, suffix=False, format=performancedata_format),
 					humanize_bytes((total_disk/100)*float(critical), precision=1, suffix=False, format=performancedata_format),
@@ -203,12 +212,18 @@ def check_sr(session, warning, critical):
 			
 	if finalexit == 2:
 		prefix = "CRITICAL: SR Space"
+		prefix += " / Critical SRs = ["+", ".join(critical_srs)+"]"
+		prefix += " / Warning SRs = ["+", ".join(warning_srs)+"]"
 	elif finalexit == 1:
 		prefix = "WARNING: SR Space"
+		prefix += " / Warning SRs = ["+", ".join(warning_srs)+"]"
 	else:
 		prefix = "OK: SR Space"
+		
 
-	print prefix + ' | ' + performance + ";\n" + ";\n".join([output[disk_srs]['service'] for disk_srs in output]) +	"; | " + " ".join([output[disk_srs]['perf'] for disk_srs in output])
+	print prefix + ' | ' + performance + "\n" + ";\n".join([output[disk_srs]['service'] for disk_srs in output]) +	"; | " + " ".join([output[disk_srs]['perf'] for disk_srs in output])
+
+	sys.exit(finalexit)
 		
 def mem(session, host, warning, critical, performancedata_format):
 
@@ -220,20 +235,20 @@ def mem(session, host, warning, critical, performancedata_format):
 		used_percent, outputdata , total, alloc = compute(hostname, mem_size, str(int(mem_size) - int(mem_free)), mem_free, warning, critical, performancedata_format, "_used_space")
 
 		if float(used_percent) >= float(critical):
-			status = "CRITICAL: SR "+ hostname
+			status = "CRITICAL: MEM "+ hostname
 			exitcode = 2
 		elif float(used_percent) >= float(warning):
-			status = "WARNING: SR "+ hostname
+			status = "WARNING: MEM "+ hostname
 			exitcode = 1
 		else:
-			status = "OK: SR "+ hostname
+			status = "OK: MEM "+ hostname
 			exitcode = 0
 
 		return(exitcode, status, outputdata['service'], outputdata['performance'], total, alloc)		
 
 	else:
-		print "CRITICAL: Cant get SR, check SR name! SR =", sr_name
-		sys.exit(2)
+		print "CRITICAL: Cant get host, check configuration"
+		sys.exit(3)
  
  
 def check_mem(session, warning, critical):
@@ -242,6 +257,8 @@ def check_mem(session, warning, critical):
 	output = {}
 	total_mem = 0
 	total_used = 0
+	critical_hosts = []
+	warning_hosts = []
 
 	hosts = session.xenapi.host.get_all()
 	for host in hosts:
@@ -250,6 +267,12 @@ def check_mem(session, warning, critical):
 		if exitcode > finalexit:
 			finalexit = exitcode
 
+		if exitcode == 2 :
+			critical_hosts.append(hostname)
+		
+		if exitcode == 1 :
+			warning_hosts.append(hostname)
+			
 		output[hostname] = {}
 		output[hostname]['service'] = servicedata
 		output[hostname]['perf'] = perfdata
@@ -275,13 +298,16 @@ def check_mem(session, warning, critical):
 
 			
 	if finalexit == 2:
-		prefix = "CRITICAL: Memory Usage"
+		prefix = "CRITICAL: Memory Usage "
+		prefix += " / Critical Hosts = ["+", ".join(critical_hosts)+"]"
+		prefix += " / Warning Hosts = ["+", ".join(warning_hosts)+"]"
 	elif finalexit == 1:
 		prefix = "WARNING: Memory Usage"
+		prefix += " / Warning Hosts = ["+", ".join(warning_hosts)+"]"
 	else:
 		prefix = "OK: Memory Usage"
 
-	print prefix + ' | ' + performance + ";\n" + ";\n".join([output[disk_srs]['service'] for disk_srs in output]) +	"; | " + " ".join([output[disk_srs]['perf'] for disk_srs in output])
+	print prefix + ' | ' + performance + "\n" + ";\n".join([output[hostname]['service'] for hostname in output]) +	"; | " + " ".join([output[hostname]['perf'] for hostname in output])
 	
 	sys.exit(finalexit)
 
