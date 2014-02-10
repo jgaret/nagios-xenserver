@@ -232,7 +232,7 @@ def mem(session, host, warning, critical, performancedata_format):
 		mem_size          = session.xenapi.host_metrics.get_record(session.xenapi.host.get_record(host)['metrics'])['memory_total']
 		mem_free          = session.xenapi.host_metrics.get_record(session.xenapi.host.get_record(host)['metrics'])['memory_free']
 		
-		used_percent, outputdata , total, alloc = compute(hostname, mem_size, str(int(mem_size) - int(mem_free)), mem_free, warning, critical, performancedata_format, "_used_space")
+		used_percent, outputdata , total, alloc = compute(hostname, mem_size, str(int(mem_size) - int(mem_free)), mem_free, warning, critical, performancedata_format, "_used_mem")
 
 		if float(used_percent) >= float(critical):
 			status = "CRITICAL: MEM "+ hostname
