@@ -432,7 +432,10 @@ if __name__ == "__main__":
 			session=XenAPI.Session('https://'+e.details[1])
 			session.xenapi.login_with_password(username, password)
 		else:
-			raise			
+			raise
+	except:
+		print "CRITICAL - Connection Error"
+		sys.exit(2)
 			
 	options[call](session, warning, critical)
 			
