@@ -164,7 +164,7 @@ def sr(session, sr_name, warning, critical, performancedata_format):
 		print "CRITICAL: Cant get SR, check SR name! SR =", sr_name
 		sys.exit(2)
 
-def check_sr(session, warning, critical):
+def check_sr(session, warning, critical,exclude_srs):
 
 	finalexit = 0
 	output = {}
@@ -176,22 +176,23 @@ def check_sr(session, warning, critical):
 	srs = session.xenapi.SR.get_all()
 	for cur_sr in srs:
 		sr_name = session.xenapi.SR.get_name_label(cur_sr)
-		if session.xenapi.SR.get_shared(cur_sr) and session.xenapi.SR.get_type(cur_sr) != 'iso':
-			exitcode, status, servicedata, perfdata, total, alloc = sr(session, sr_name, warning, critical, performancedata_format)
-			if exitcode > finalexit:
-				finalexit = exitcode
-				
-			if exitcode == 2:
-				critical_srs.append(sr_name)
-			if exitcode == 1:
-				warning_srs.append(sr_name)
+		if sr_name not in exclude_srs:
+			if session.xenapi.SR.get_shared(cur_sr) and session.xenapi.SR.get_type(cur_sr) != 'iso':
+				exitcode, status, servicedata, perfdata, total, alloc = sr(session, sr_name, warning, critical, performancedata_format)
+				if exitcode > finalexit:
+					finalexit = exitcode
+					
+				if exitcode == 2:
+					critical_srs.append(sr_name)
+				if exitcode == 1:
+					warning_srs.append(sr_name)
 
-			output[sr_name] = {}
-			output[sr_name]['service'] = servicedata
-			output[sr_name]['perf'] = perfdata
-			
-			total_disk += total
-			total_alloc += alloc
+				output[sr_name] = {}
+				output[sr_name]['service'] = servicedata
+				output[sr_name]['perf'] = perfdata
+				
+				total_disk += total
+				total_alloc += alloc
 
 	
 	if performancedata_format == "pnp4nagios":
@@ -251,7 +252,7 @@ def mem(session, host, warning, critical, performancedata_format):
 		sys.exit(3)
  
  
-def check_mem(session, warning, critical):
+def check_mem(session, warning, critical,exclude_srs):
 
 	finalexit = 0
 	output = {}
@@ -311,7 +312,7 @@ def check_mem(session, warning, critical):
 	
 	sys.exit(finalexit)
 
-def check_hosts(session, warning, critical):
+def check_hosts(session, warning, critical,exclude_srs):
 	#work out which hosts in the pool are alive, and which dead
 	hosts=session.xenapi.host.get_all()
 	hosts_with_status=[(session.xenapi.host.get_name_label(x),session.xenapi.host_metrics.get_live( session.xenapi.host.get_metrics(x) )) for x in hosts]
@@ -332,7 +333,7 @@ def check_hosts(session, warning, critical):
 
 	sys.exit(exit)
 
-def check_cpu(session, warning, critical):
+def check_cpu(session, warning, critical,exclude_srs):
 
 	import parse_rrd
 	params = {}
@@ -414,7 +415,8 @@ if __name__ == "__main__":
 		warning  = sys.argv[3]
 		critical = sys.argv[4]
 		call = sys.argv[5]
-	
+		
+		exclude_srs = config.get(url,"exclude_srs").split()
 
 	options  = {
 		'check_sr': check_sr,
@@ -439,6 +441,6 @@ if __name__ == "__main__":
 		print "CRITICAL - Connection Error"
 		sys.exit(2)
 			
-	options[call](session, warning, critical)
-			
+	options[call](session, warning, critical,exclude_srs)
+	sys.exit(0)
 	
