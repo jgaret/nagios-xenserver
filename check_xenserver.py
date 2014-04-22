@@ -416,7 +416,7 @@ if __name__ == "__main__":
 		critical = sys.argv[4]
 		call = sys.argv[5]
 		
-		exclude_srs = config.get(url,"exclude_srs").split()
+		exclude_srs = config.get(url,"exclude_srs").split(',')
 
 	options  = {
 		'check_sr': check_sr,
