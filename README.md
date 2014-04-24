@@ -8,15 +8,17 @@ Nagios check plugin for xenserver
 or, if using config file to store username or password
 	Usage: ./check_xenserver.py <XenServer IP or FQDN> <config file> <warning level %> <critical level %> <check_{sr,mem,cpu,hosts}>
 
-Config file follows ini format. A section is the XenServer IP or FQDN you are calling, values are username and password.
+Config file follows ini format. A section is the XenServer IP or FQDN you are calling, values are username and password, and list of SRs to exclude from monitoring.
 Example :
 ```
 [127.0.0.1]
 username: root
 password: root	
+exclude_srs: SR1, SR2
 [10.0.0.1]
 username: nagios
 password: nagios
+exclude_srs:
 ```	
  - Uses https to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
  - Uses (python) XenAPI, download it from XenServer http://www.xenserver.org/partners/developing-products-for-xenserver.html and parse_rrd
