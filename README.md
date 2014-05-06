@@ -9,10 +9,10 @@ see online help for more informations
 
 Config file follows ini format. In the [general] section, define the performance data format : can be "pnp4nagios" or other.
 The name of the other sections are references, mandatory fields are :
-host: ip or name of the pool master
-username:
-password:
-exclude_SRs: <list of SRs you want to exclude>
+ - host: ip or name of the pool master
+ - username
+ - password
+ - exclude_SRs: <list of SRs you want to exclude>
 
 Example :
 ```
