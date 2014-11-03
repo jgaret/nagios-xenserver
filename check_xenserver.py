@@ -362,9 +362,9 @@ def check_cpu(session, args):
             prefix = "OK: CPU "
             
     globalperf = globalperf / len(perfdata)
-    print prefix + "| 'used_cpu'="+str(round(globalperf, 2))+"%;" + str(warning)+"%;" + str(critical)+"%;0%;100%;\n"+\
-    ";\n".join([host+" Used CPU = "+str(round(perfdata[host],2)) for host in perfdata]) + "%; |" +\
-    " ".join(["'"+host+"_used_cpu'="+str(round(perfdata[host],2))+"%;"+str(warning)+"%;" + str(critical)+"%;0%;100%" for host in perfdata])
+    print prefix + "| 'used_cpu'="+str(round(globalperf, 2)*100)+"%;" + str(warning)+"%;" + str(critical)+"%;0%;100%;\n"+\
+    ";\n".join([host+" Used CPU = "+str(round(perfdata[host],2)*100) for host in perfdata]) + "%; |" +\
+    " ".join(["'"+host+"_used_cpu'="+str(round(perfdata[host],2)*100)+"%;"+str(warning)+"%;" + str(critical)+"%;0%;100%" for host in perfdata])
     
     sys.exit(exitcode)
         
