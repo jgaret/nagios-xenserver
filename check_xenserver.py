@@ -362,9 +362,9 @@ def check_cpu(session, args):
             prefix = "OK: CPU "
             
     globalperf = globalperf / len(perfdata)
-    print prefix + "| 'used_cpu'="+str(round(globalperf, 2))+"%;" + str(float(warning)/100)+"%;" + str(float(critical)/100)+"%;0%;100%;\n"+\
+    print prefix + "| 'used_cpu'="+str(round(globalperf, 2))+"%;" + str(warning)+"%;" + str(critical)+"%;0%;100%;\n"+\
     ";\n".join([host+" Used CPU = "+str(round(perfdata[host],2)) for host in perfdata]) + "%; |" +\
-    " ".join(["'"+host+"_used_cpu'="+str(round(perfdata[host],2))+"%;"+str(float(warning)/100)+"%;" + str(float(critical)/100)+"%;0%;100%" for host in perfdata])
+    " ".join(["'"+host+"_used_cpu'="+str(round(perfdata[host],2))+"%;"+str(warning)+"%;" + str(critical)+"%;0%;100%" for host in perfdata])
     
     sys.exit(exitcode)
         
@@ -394,7 +394,7 @@ if __name__ == "__main__":
     parser_mem = subparsers.add_parser("check_mem", help="Check for mem usage on all hosts", parents=[common_parser])
     
     #Check hosts parser
-        parser_hosts = subparsers.add_parser("check_hosts", help="Check if hosts are alive or not")
+    parser_hosts = subparsers.add_parser("check_hosts", help="Check if hosts are alive or not")
     
     #Check cpu parser
     parser_cpu = subparsers.add_parser("check_cpu",help="Check cpu usage", parents=[common_parser])
