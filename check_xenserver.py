@@ -45,7 +45,8 @@ def logout():
         session.xenapi.session.logout()
     except:
         pass
-    atexit.register(logout)
+
+atexit.register(logout)
 
 def humanize_bytes(bytes, precision=2, suffix=True, format="pnp4nagios"):
 
